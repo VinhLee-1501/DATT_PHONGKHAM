@@ -2,7 +2,7 @@
     <div class="container">
         <div class="header__frame">
             <a href="{{ route('client.home') }}" class="header__logo">
-                <img src="{{ asset('frontend/assets/image/logo-header.png') }}" alt="VIETCARE HOSPITAL" />
+                <img src="{{ asset('frontend/assets/image/Vietcare.png')}}" alt="VIETCARE HOSPITAL" />
             </a>
             <div class="header__wrap">
                 <ul class="header__menu mt-3">
@@ -10,9 +10,9 @@
                         <a class="item__link" href="{{ route('client.introduce') }}">Giới thiệu</a>
                     </li>
 
-                    <li class="item">
-                        <a class="item__link" href="{{ route('client.treatment-method') }}">Phương pháp điều trị</a>
-                    </li>
+                    {{-- <li class="item">
+                        <a class="item__link" href="{{ route('shop.shop') }}">Cửa Hàng</a>
+                    </li> --}}
                     <li class="item">
                         <a class="item__link" href="{{ route('client.news') }}">Tin tức</a>
                     </li>
@@ -28,9 +28,40 @@
 
             </div>
             @if (auth()->check())
-                <div style="width: 200px" class="header__login">
-                    <a href="{{ route('client.profile.index') }}" class="">{{ auth()->user()->lastname }}
-                        {{ auth()->user()->firstname }}</a>
+                <div style="width: 4%;" class="header__login" onclick="toggleMenu()">
+                    @if (empty(auth()->user()->avatar))
+                        <img style="max-width: 100%; border: 1px solid #048647;"
+                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png"
+                            alt="{{ auth()->user()->firstname }}">
+                    @else
+                        @if (auth()->user()->google_id || auth()->user()->zalo_id || auth()->user()->facebook_id)
+                            <img style="max-width: 100%; border: 1px solid #048647;"
+                                src="{{ auth()->user()->avatar }}" alt="{{ auth()->user()->firstname }}">
+                        @else
+                            @if (auth()->user()->avatar ===
+                                    'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png')
+                                <img style="max-width: 100%; border: 1px solid #048647;"
+                                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png"
+                                    alt="{{ auth()->user()->firstname }}">
+                            @else
+                                <img style="max-width: 100%; border: 1px solid #048647;"
+                                    src="{{ asset('storage/uploads/avatars/' . auth()->user()->avatar) }}"
+                                    alt="{{ auth()->user()->firstname }}">
+                            @endif
+                        @endif
+                    @endif
+
+
+                    <div id="dropdownMenu" class="dropdown-menu" style="display: none;">
+                        <ul>
+                            <a href="{{ route('client.profile.index') }}">
+                                <li><i class="fa-regular fa-user"></i> Thông tin tài khoản</li>
+                            </a>
+                            <a href="{{ route('client.logout') }}">
+                                <li><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</li>
+                            </a>
+                        </ul>
+                    </div>
                 </div>
             @else
                 <div class="header__login">
@@ -38,18 +69,15 @@
                         <div class="button btn-small btn-cta openPopup">
                             Đăng nhập
                         </div>
-                        
-                        <div class="login-options" style="display: none;">
-                            <a href="{{ route('client.login') }}">
-                                <div style="border-radius: 0px; width: 240px" class="button btn-small">
-                                    Đăng nhập người dùng
-                                </div>
-                            </a>
-                            <a href="{{ route('system.auth.login') }}">
-                                <div style="border-radius: 0px; width: 240px" class="button btn-small">
-                                    Đăng nhập với bác sĩ
-                                </div>
-                            </a>
+                        <div id="dropdownMenu" class="dropdown-menu" style="display: none;">
+                            <ul>
+                                <a href="{{ route('client.login') }}">
+                                    <li><i class="fa-regular fa-user"></i> Đăng nhập người dùng</li>
+                                </a>
+                                <a href="{{ route('system.auth.login') }}">
+                                    <li><i class="fa-solid fa-user-doctor"></i> Đăng nhập bác sĩ</li>
+                                </a>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -57,7 +85,7 @@
                 <script>
                     // Lấy các phần tử cần thiết
                     const loginContainer = document.querySelector('.login-container');
-                    const loginOptions = document.querySelector('.login-options');
+                    const loginOptions = document.querySelector('.dropdown-menu');
                     const loginButton = loginContainer.querySelector('.openPopup');
 
                     // Hiện/ẩn login-options khi nhấn vào nút Đăng nhập
@@ -76,7 +104,7 @@
             <div class="header__booking">
 
                 <a href="{{ route('client.booking') }}">
-                    <div class="button btn-small btn-cta openPopup">
+                    <div style="background-color: #ffbc11" class="button btn-small btn-cta openPopup">
                         <i class="fa-regular fa-calendar-check"></i> Đặt lịch
                     </div>
                 </a>
@@ -127,7 +155,7 @@
             <a href="{{ route('client.introduce') }}">Giới thiệu</a>
         </li>
         <li class="">
-            <a href="{{ route('client.treatment-method') }}">Phương pháp điều trị</a>
+            <a href="#">Sản phẩm</a>
         </li>
         <li class="">
             <a href="{{ route('client.news') }}">Tin tức</a>

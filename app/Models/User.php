@@ -2,19 +2,19 @@
 
 namespace App\Models;
 
+use App\Models\Products\AdminComment;
+use App\Models\Products\CartProduct;
+use App\Models\Products\ReviewProduct;
+use App\Models\ProfileDoctor;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $primaryKey = 'row_id'; // Khóa chính
 
     protected $fillable = [
@@ -37,48 +37,74 @@ class User extends Authenticatable
         'specialty_id',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
         'birthday' => 'date',
-        'password' => 'hashed',
     ];
 
-    /**
-     * Một người dùng có thể có một chuyên khoa
-     */
     public function specialty()
     {
         return $this->belongsTo(Specialty::class, 'user_id', 'user_id');
     }
 
-    /**
-     * Một người dùng có thể có nhiều lịch
-     */
     public function schedules()
     {
         return $this->hasMany(Schedule::class, 'user_id', 'user_id');
     }
 
-    /**
-     * Một người dùng có thể có một bệnh nhân
-     */
     public function patient()
     {
         return $this->hasOne(Patient::class, 'phone', 'phone');
     }
+
+    public function getFullNameAttribute()
+    {
+        return "{$this->firstname} {$this->lastname}";
+    }
+
+    public function hasRole($role)
+    {
+        return $this->role === $role;
+    }
+
+    // Phương thức đặt lại mật khẩu
+    public static function resetUserPassword($email, $newPassword)
+    {
+        $user = self::where('email', $email)->first();
+        if ($user) {
+            $user->password = Hash::make($newPassword);
+            return $user->save();
+        }
+        return false;
+    }
+
+    public function cart()
+    {
+        return $this->hasMany(CartProduct::class, 'user_id', 'user_id');
+    }
+
+    public function order()
+    {
+        return $this->hasMany(Order::class, 'user_id', 'user_id');
+    }
+
+    public function review()
+    {
+        return $this->hasMany(ReviewProduct::class, 'user_id', 'user_id');
+    }
+
+    public function reviewAd()
+    {
+        return $this->hasMany(AdminComment::class, 'user_id', 'user_id');
+    }
+
+    public function profileDoctor()
+{
+    return $this->hasOne(ProfileDoctor::class, 'user_id', 'user_id');
+}
 }

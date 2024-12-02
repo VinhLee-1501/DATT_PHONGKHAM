@@ -5,15 +5,18 @@
 @section('content')
 
     <style>
+        .page {
+            background-image: url('http://127.0.0.1:8000/frontend/assets/image/background-diagnosis.png');
+        }
+
         .diagnosis-container {
             max-width: 600px;
             margin: auto;
-            background: #ffffff;
-            border-radius: 10px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             padding: 30px;
             margin-top: 10%;
             border: 1px solid #03B75F;
+            background-color: #fff;
         }
 
         .diagnosis-title {
@@ -43,7 +46,7 @@
             width: 100%;
             padding: 12px;
             border: 1px solid #ccc;
-            border-radius: 6px;
+
             font-size: 16px;
             transition: border-color 0.3s;
         }
@@ -65,11 +68,15 @@
             background-color: #28a745;
             color: white;
             border: none;
-            border-radius: 25px;
+
             font-size: 18px;
             cursor: pointer;
             transition: background-color 0.3s;
             margin-top: 10px;
+        }
+
+        .record-button {
+            margin-left: 5px
         }
 
         .record-button:hover,
@@ -90,7 +97,7 @@
             padding: 15px;
             background-color: #f8f9fa;
             border: 1px solid #ced4da;
-            border-radius: 6px;
+
             color: #333;
             font-size: 16px;
         }
@@ -111,7 +118,8 @@
         th {
             background-color: #f2f2f2;
         }
-        .warning{
+
+        .warning {
             font-size: 11px;
             color: red;
         }
@@ -137,7 +145,8 @@
         </div>
 
         <label for="diagnosis" class="input-label">Kết quả chuẩn đoán</label>
-        <span class="warning">*Đây chỉ là kết quả chuẩn đoán, vui lòng đến bệnh viện được bác sĩ đưa ra kết quả chính xác hơn</span>
+        <span class="warning">*Đây chỉ là kết quả chuẩn đoán, vui lòng đến bệnh viện được bác sĩ đưa ra kết quả chính xác
+            hơn</span>
         <div id="diagnosis" class="diagnosis-output" aria-placeholder="Kết quả chuẩn đoán ...">
             <table id="diagnosisTable" style="display:none;">
                 <thead>
@@ -257,8 +266,8 @@
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "App-Id": "217bf5c7",
-                    "App-Key": "c8013e640d1c2e8412ab9e8eaeb36b15",
+                    "App-Id": "263de5b3",
+                    "App-Key": "d725d6b43df5f3b2ffcebc23a7dd1923",
                 },
                 body: JSON.stringify({
                     text: translatedSymptoms,
@@ -280,8 +289,8 @@
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "App-Id": "217bf5c7",
-                    "App-Key": "c8013e640d1c2e8412ab9e8eaeb36b15",
+                    "App-Id": "263de5b3",
+                    "App-Key": "d725d6b43df5f3b2ffcebc23a7dd1923",
                 },
                 body: JSON.stringify({
                     age: {

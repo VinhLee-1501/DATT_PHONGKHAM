@@ -43,6 +43,7 @@
         integrity="sha512-vKMx8UnXk60zUwyUnUPM3HbQo8QfmNx7+ltw8Pm5zLusl1XIfwcxo8DbWCqMGKaWeNxWA8yrx5v3SaVpMvR3CA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="{{ asset('frontend/assets/js/app.js') }}"></script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
 </head>
 
@@ -71,6 +72,7 @@
     {{-- popup start --}}
     <x-client.popupBooking :specialties="$specialties"/>
     <x-client.popupLogin></x-client.popupLogin>
+    <x-client.popupResetPassword></x-client.popupResetPassword>
 
     {{-- popup end --}}
 
@@ -99,6 +101,8 @@
             var $popupRegister = $('#popupRegister');
             var $popupForgotPassword = $('#popupForgotPassword');
             var $popupBooking = $('#popupBooking');
+            var $popupResetPassword = $('#popupResetPassword');
+            
 
 
 
@@ -121,6 +125,10 @@
             }
             if (showPopup === 'booking') {
                 $popupBooking.addClass('active');
+                console.log('Popup should now be visible');
+            }
+            if (showPopup === 'reset-password') {
+                $popupResetPassword.addClass('active');
                 console.log('Popup should now be visible');
             }
 

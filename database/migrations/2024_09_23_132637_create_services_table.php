@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('service_id', 10)->unique();
             $table->string('name', 50);
             $table->float('price');
+            $table->tinyInteger('status')->default(0);
             $table->string('directory_id', 10)->nullable();
             $table->foreign('directory_id')
                 ->references('directory_id')

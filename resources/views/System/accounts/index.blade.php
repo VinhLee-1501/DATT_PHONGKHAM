@@ -1,77 +1,65 @@
 @extends('layouts.admin.master')
-@section('Quản lý tài khoản')
-    @section('content')
+@section('title', 'Quản lý tài khoản')
+@section('content')
 
-        <nav>
-            <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home"
-                        type="button" role="tab" aria-controls="nav-home" aria-selected="true">Quản trị
-                </button>
-                <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile"
-                        type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Bác sĩ
-                </button>
-                <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact"
-                        type="button" role="tab" aria-controls="nav-contact" aria-selected="false">Người dùng
-                </button>
-            </div>
-        </nav>
-
-
-        <div class="tab-content" id="nav-tabContent">
-
-
-<div class="d-flex align-items-center justify-content-between py-3">
-
-    <div class="col-md-6 d-flex">
-        <form action="" class="col-md-12 row">
-            <div class="col-md-6">
-                <input type="text" id="nameInput" class="form-control" placeholder="Tìm theo Họ tên"
-                       name="name">
-            </div>
-            <div class="col-md-6">
-                <input type="text" id="phoneInput" class="form-control" placeholder="Tìm theo SDT" name="phone">
-            </div>
-
-        </form>
+<nav class="mb-3">
+    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+        <button class="nav-link {{ $activeTab == 'nav-home' ? 'active' : '' }}" id="nav-home-tab" data-bs-toggle="tab"
+            data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true"
+            onclick="window.location='?tab=nav-home'">Quản trị
+        </button>
+        <button class="nav-link {{ $activeTab == 'nav-contact' ? 'active' : '' }}" id="nav-contact-tab"
+            data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact"
+            aria-selected="false" onclick="window.location='?tab=nav-contact'">Người dùng
+        </button>
     </div>
+</nav>
 
-    <div class="">
-        <a href="{{ route('system.accounts.create') }}" class="btn btn-success me-2">Thêm Tài Khoản</a>
-    </div>
+<div class="tab-content" id="nav-tabContent">
 
-
-</div>
-
-
-
-
-            <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
-
-                @include(('System.accounts.admin'))
+    <form action="{{ route('system.account') }}" method="GET" class="row mb-3 g-2 align-items-center" id="searchForm">
+        <div class="col-md-8 ">
+            <div class="row g-2  align-items-center">
+                <div class="col-md-4 col-12 ">
+                    <input type="text" id="lastnameInput" class="form-control" placeholder="Tìm theo Họ" name="lastname"
+                        value="{{ request('lastname') }}">
+                </div>
+                <div class="col-md-4 col-12 ">
+                    <input type="text" id="firstnameInput" class="form-control" placeholder="Tìm theo Tên"
+                        name="firstname" value="{{ request('firstname') }}">
+                </div>
+                <div class="col-md-4 col-12 ">
+                    <input type="text" id="phoneInput" class="form-control" placeholder="Tìm theo SĐT" name="phone"
+                        value="{{ request('phone') }}">
+                </div>
             </div>
-
-
-            <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
-
-                @include('System.accounts.doctors')
-
-            </div>
-
-
-            <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
-                @include('System.accounts.users')
+        </div>
+        <div class="col-md-4  ">
+            <div class="row g-2  align-items-center">
+                <div class="col-md-6 col-12">
+                    <button type="submit" class="btn btn-primary w-100">Tìm kiếm</button>
+                </div>
+                <div class="col-md-6 col-12">
+                    <a href="{{ route('system.accounts.create') }}" class="btn btn-success w-100">Thêm Tài Khoản</a>
+                </div>
             </div>
         </div>
 
+        <!-- Đảm bảo tab hiện tại được giữ lại trong URL -->
+        <input type="hidden" name="tab" value="{{ request('tab', 'nav-home') }}">
+    </form>
 
-        <script>
-            $(document).ready(function () {
-                $("#phoneInput, #nameInput").on("keyup", function () {
-                    var value = $(this).val().toLowerCase();
-                    $("#myTable tr").filter(function () {
-                        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-                    });
-                });
-            });
-        </script>
-    @endsection
+
+    <div class="tab-pane fade show {{ $activeTab == 'nav-home' ? 'show active' : '' }}" id="nav-home" role="tabpanel"
+        aria-labelledby="nav-home-tab">
+        @include('System.accounts.admin', ['admin' => $admin]) <!-- Truyền biến admin vào view -->
+    </div>
+
+    <div class="tab-pane fade {{ $activeTab == 'nav-contact' ? 'show active' : '' }}" id="nav-contact" role="tabpanel"
+        aria-labelledby="nav-contact-tab">
+        @include('System.accounts.users', ['users' => $users]) <!-- Truyền biến users vào view -->
+    </div>
+
+</div>
+
+@endsection

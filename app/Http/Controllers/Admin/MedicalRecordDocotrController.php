@@ -34,9 +34,6 @@ class MedicalRecordDocotrController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        // dd($medicalRecord);
-
-
         return view('System.doctors.medical.index', ['medicalRecord' => $medicalRecord]);
     }
 
@@ -45,13 +42,12 @@ class MedicalRecordDocotrController extends Controller
     {
 
         $medical = MedicalRecord::where('medical_id', $medical_id)->first();
-        // dd($medical);
+        $doctor = Auth::user();
         $medical_id = $medical->medical_id;
         $patient_id = $medical->patient_id;
-
+        
         $treatment = TreatmentDetail::where('medical_id', $medical_id)->first();
 
-        // dd($medical_id);
         $treatment_id = $treatment->treatment_id;
 
         $patient = Patient::where('patient_id', $patient_id)->first();
@@ -79,7 +75,14 @@ class MedicalRecordDocotrController extends Controller
         $service = Service::get();
         $medicine = Medicine::select('*')->distinct()->get();
 
-        // dd($medical_patient);
+        $content = MedicalRecord::join('users', 'users.user_id', '=', 'medical_records.user_id')
+        ->join('books', 'books.book_id', '=', 'medical_records.book_id')
+        ->join('specialties', 'specialties.specialty_id', 'books.specialty_id')
+        ->join('schedules', 'schedules.shift_id', '=', 'books.shift_id')
+        ->join('sclinics', 'sclinics.sclinic_id', 'schedules.sclinic_id')
+        ->where('medical_records.medical_id', $medical_id)
+        ->select('sclinics.name as sclinicName', 'specialties.name as specialtyName')
+        ->get();
 
         return view(
             'System.doctors.medical.medicalRecording',
@@ -91,7 +94,8 @@ class MedicalRecordDocotrController extends Controller
                 'service' => $service,
                 'totalprice' => $totalprice,
                 'medicine' => $medicine,
-
+                'doctor' => $doctor,
+                'content' => $content,
             ]
         );
     }
@@ -166,7 +170,7 @@ class MedicalRecordDocotrController extends Controller
         session()->forget('pdf_data');
     
         $pdf = Pdf::loadView('System.doctors.medical.pdfMedicine', ['data' => $data]);
-        $pdf->setPaper('A4', 'landscape');
+        $pdf->setPaper('A4', 'portrait');
     
         return $pdf->download('Donthuoc.pdf');
     }
@@ -175,7 +179,7 @@ class MedicalRecordDocotrController extends Controller
 
     public function detail($medical_id)
     {
-        // dd($medical_id);
+      
         $medical = MedicalRecord::select('medical_records.*', 'patients.*', 'users.*', 'treatment_details.*')
             ->join('patients', 'patients.patient_id', '=', 'medical_records.patient_id')
             ->join('treatment_details', 'treatment_details.medical_id', '=', 'medical_records.medical_id')
@@ -202,7 +206,7 @@ class MedicalRecordDocotrController extends Controller
         $medicines = Medicine::join('treatment_medications', 'treatment_medications.medicine_id', '=', 'medicines.medicine_id')
             ->where('treatment_medications.treatment_id', $treatment_id)
             ->get();
-        // dd($medicines);
+        
         return view(
             'System.doctors.medical.detail',
             [

@@ -5,6 +5,9 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use App\Models\Specialty;
 use App\Models\Patient;
+use App\Models\Products\CartDetail;
+use App\Models\Products\CartProduct;
+use App\Models\Products\ParentCategory;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Log;
@@ -29,6 +32,6 @@ class CommonServiceProvider extends ServiceProvider
     public function boot()
     {
         // Chia sẻ biến $specialties cho tất cả các view
-         View::share('specialties', Specialty::where('status', 1)->get());
+        View::share('specialties', Specialty::where('status', 1)->get());
     }
 }

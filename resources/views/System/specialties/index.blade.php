@@ -1,76 +1,107 @@
 @extends('layouts.admin.master')
 @section('title', 'Quản lý chuyên khoa')
 @section('content')
-    <div class="card w-100">
-        <div class="card-body p-4">
-            <div class="col-md-12 d-flex justify-content-around align-items-center">
-                <div class="col-md-12 d-flex justify-content-center align-items-center">
-                    <div class="col-md-4">
-                        <h5 class="card-title fw-semibold mb-4">Quản lý chuyên khoa</h5>
-                    </div>
-                    <div class="col-md-4">
-                        <button class="btn btn-success mb-4" onclick="openModalCreate()">Thêm</button>
-                    </div>
-                    <div class="col-md-3 d-flex justify-content-end mb-4">
-                        <div class="w-100">
-                            <input type="text" id="inputName" class="form-control"
-                                   placeholder="Tìm kiếm chuyên khoa" name="nameSpecialty">
-                        </div>
-                    </div>
-                </div>
+
+<div class="card w-100">
+    <div class="card-body p-4">
+
+        <h5 class="card-title fw-semibold mb-4">Quản lý chuyên khoa</h5>
+
+        <form action="{{ route('system.specialty') }}" method="GET" class="row g-1 align-items-center">
+
+            <div class="col-md-4">
+                <input type="text" id="inputName" class="form-control" placeholder="Tìm kiếm chuyên khoa" name="nameSpecialty" value="{{ request('nameSpecialty') }}">
+            </div>
+            <div class="col-md-4">
+                <select class="form-select" name="status" id="status">
+                    <option value="">Chọn trạng thái</option>
+                    <option value="1" {{ request('status') == 1 ? 'selected' : '' }}>Hoạt động</option>
+                    <option value="0" {{ request('status') == 0 ? 'selected' : '' }}>Không hoạt động</option>
+                </select>
             </div>
 
-            <table class="table text-nowrap mb-0 align-middle">
-                <thead class="text-dark fs-4">
-                <tr class="text-center">
-                    <th class="border-bottom-0">
-                        <h6 class="fw-semibold mb-0">ID</h6>
-                    </th>
-                    <th class="border-bottom-0">
-                        <h6 class="fw-semibold mb-0">Tên chuyên khoa</h6>
-                    </th>
-                    {{--                    <th class="border-bottom-0">--}}
-                    {{--                        <h6 class="fw-semibold mb-0">Số lượng bác sĩ</h6>--}}
-                    {{--                    </th>--}}
-                    <th class="border-bottom-0">
-                        <h6 class="fw-semibold mb-0">Thao tác</h6>
-                    </th>
-                </tr>
+
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100">Tìm kiếm</button>
+            </div>
+            <div class="col-md-2">
+                <a class="btn btn-success w-100" onclick="openModalCreate()">Thêm</a>
+            </div>
+        </form>
+
+        <!-- </div> -->
+        <div class="table-responsive">
+            <div class="mt-3">
+                {!! $specialties->links() !!}
+
+            </div>
+            <table class="table table-bordered text-nowrap mb-0 align-middle">
+                <thead class="text-dark fs-4  ">
+                    <tr class="text-center">
+                        <th class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0">ID</h6>
+                        </th>
+                        <th class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0">Tên chuyên khoa</h6>
+                        </th>
+                        <th class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0">Trạng thái</h6>
+                        </th>
+
+                        <th class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0">Thao tác</h6>
+                        </th>
+                    </tr>
                 </thead>
                 @php
-                    $count = 1;
+                $count = 1;
                 @endphp
                 <tbody id="myTable">
-                @foreach($specialties as $specialty)
+                    @if($specialties->isEmpty())
+                    <div id="noResults" class="alert alert-warning">Không tìm thấy dữ liệu.</div>
+                    @else
+                    @foreach ($specialties as $specialty)
                     <tr class="text-center">
-                        <td class="border-bottom-0">{{$count++}}</td>
-                        <td class="border-bottom-0">{{$specialty->name}}</td>
-                        {{--                        <td class="border-bottom-0">--}}
-                        {{--                            {{$specialty->doctors_count }}--}}
-                        {{--                        </td>--}}
+                        <td class="border-bottom-0">{{ $count++ }}</td>
+                        <td class="border-bottom-0">{{ $specialty->name }}</td>
                         <td class="border-bottom-0">
-                            <a href="{{ route('system.detail', $specialty->specialty_id) }}" class="btn btn-primary">
+                            @if($specialty->status == 0)
+                            <span class="badge bg-danger">Không Hoạt động</span>
+                            @elseif($specialty->status == 1)
+                            <span class="badge bg-success">Hoạt động</span>
+                            @endif
+                        </td>
+
+                        <td class="border-bottom-0">
+                            <a href="{{ route('system.detail_specialty', $specialty->specialty_id) }}"
+                                class="btn btn-primary">
                                 <i class="ti ti-notes"></i>
                             </a>
-                            <a href="javascript:void(0)"
-                               class="btn btn-primary " onclick="openModalEdit('{{ $specialty->specialty_id }}')"><i
+                            <a href="javascript:void(0)" class="btn btn-primary "
+                                onclick="openModalEdit('{{ $specialty->specialty_id }}')"><i
                                     class="ti ti-pencil"></i></a>
-                            <form action="{{route('system.delete', $specialty->specialty_id)}}"
-                                  id="form-delete{{ $specialty->specialty_id }}" method="POST"
-                                  style="display: inline;">
+                            <form action="{{ route('system.delete_specialty', $specialty->specialty_id) }}"
+                                id="form-delete{{ $specialty->specialty_id }}" method="POST"
+                                style="display: inline;">
                                 @csrf
                                 @method('DELETE')
                             </form>
                             <button type="submit" class="btn btn-danger btn-delete"
-                                    data-id="{{ $specialty->specialty_id }}">
+                                data-id="{{ $specialty->specialty_id }}">
                                 <i class="ti ti-trash"></i>
                             </button>
 
                         </td>
                     </tr>
-                @endforeach
+                    @endforeach
+                    @endif
                 </tbody>
             </table>
+            <div class="mt-3">
+                {!! $specialties->links() !!}
+
+            </div>
+
         </div>
     </div>
 
@@ -82,23 +113,24 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="specialty-form">
+                    <form id="addSpecialtyForm">
+                        @csrf
                         <div class="mb-3">
                             <label for="recipient-name" class="col-form-label">Tên chuyên khoa:</label>
-                            <input type="text" name="name"
-                                   class="form-control" id="specialtyName" value="">
-                            <span class="text-danger" id="name-error"></span>
+                            <input type="text" name="specialtyName" class="form-control" id="specialtyName">
+                            <span class="invalid-feedback" id="specialtyName_error"></span>
                         </div>
                         <div class="mb-3">
-                            <input class="form-check-input" type="checkbox" value=""
-                                   name="status" id="specialtyStatus">
+                            <input class="form-check-input" type="checkbox" name="specialtyStatus" id="specialtyStatus"
+                                value="1">
+                            {{-- <input type="hidden" name="specialtyStatus" value="0"> --}}
                             <label class="form-check-label" for="confirmation-check">Xác nhận</label>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-primary" id="save-btn">Lưu</button>
+                    <button type="submit" class="btn btn-primary" id="addSpecialty">Lưu</button>
                 </div>
             </div>
         </div>
@@ -112,24 +144,25 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="specialty-form">
+                    <form id="updateSpecialtyForm">
                         <div class="mb-3">
                             <label for="recipient-name" class="col-form-label">Tên chuyên khoa:</label>
-                            <input type="text" name="nameEdit"
-                                   class="form-control" id="specialtyNameEdit" value="">
+                            <input type="text" name="specialtyName" class="form-control" id="specialtyNameEdit"
+                                value="">
                             <input type="text" name="specialty_id" id="specialty_id" hidden>
-                            <span class="text-danger" id="name-error"></span>
+
+                            <span class="invalid-feedback" id="specialtyName_error"></span>
                         </div>
                         <div class="mb-3">
-                            <input class="form-check-input" type="checkbox" value=""
-                                   name="statusEdit" id="specialtyStatusEdit">
+                            <input class="form-check-input" type="checkbox" value="" name="specialtyStatus"
+                                id="specialtyStatusEdit">
                             <label class="form-check-label" for="confirmation-check">Xác nhận</label>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" id="save-btn-edit">Lưu</button>
+                    <button type="button" class="btn btn-primary" id="updateSpecialty">Lưu</button>
                 </div>
             </div>
         </div>
@@ -139,103 +172,115 @@
             $('#exampleModal').modal('show');
         }
 
-        $('#save-btn').click(function () {
-            console.log('aaaa')
-            const specialtyName = $('#specialtyName').val();
-            const specialtyStatus = $('#specialtyStatus').is(':checked') ? 1 : 0;
-            // console.log(specialtyName);
+        $(document).ready(function() {
 
-            // Kiểm tra lỗi
-            if (specialtyName === "") {
-                $('#name-error').text("Tên chuyên khoa không được để trống");
-                return;
-            } else {
-                $('#name-error').text("");
-            }
-            $.ajax({
-                url: '/system/specialties/create',
-                type: 'POST',
-                data: {
-                    'name': specialtyName,
-                    'status': specialtyStatus,
-                    '_token': '{{ csrf_token() }}'
-                },
-                success: function (response) {
-                    console.log(response);
-                    $('#exampleModal').modal('hide');
-                    location.reload();
-                },
-                error: function (error) {
-                    if (error.status === 422) {
-                        let errors = error.responseJSON.errors;
-                        if (errors.name) {
-                            $('#name-error').text(errors.name[0]);
-                        }
-                    } else {
-                        console.error(error);
-                    }
+            $('#addSpecialty').click(function(e) {
+                e.preventDefault();
+                if ($('#specialtyStatus').is(':checked')) {
+                    $('#specialtyStatus').val(1);
+                } else {
+                    $('#specialtyStatus').val(0);
                 }
-            });
-        });
-        $(document).ready(function () {
+                var formData = $('#addSpecialtyForm').serialize();
 
-        });
+                $.ajax({
+                    url: '/system/specialties/store',
+                    type: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        $('#exampleModal').modal('hide');
+                        if (response.success) {
+                            toastr.success(response.message);
+                            setTimeout(() => {
+                                location.reload();
+                            }, 2000)
+                        } else if (response.error) {
+                            toastr.error(response.message);
+                        }
+                    },
+                    error: function(error) {
+                        if (error.responseJSON && error.responseJSON.errors) {
+                            let errors = error.responseJSON.errors;
 
+                            $('.invalid-feedback').text('');
+                            $('.form-control').removeClass('is-invalid');
+                            $.each(errors, function(key, value) {
+                                $('#' + key).addClass('is-invalid');
+                                $('#' + key + '_error').text(value[0]);
+                            });
+                        } else {
+                            console.error(error);
+                        }
+                    }
+                });
+            })
+        })
+    </script>
+
+    <script>
         function openModalEdit(id) {
             $('#exampleModalEdit').modal('show');
             console.log(id);
             $.ajax({
                 url: '/system/specialties/edit/' + id,
                 type: 'GET',
-                success: function (response) {
-                    if (response.nameEdit && response.statusEdit) {
+                success: function(response) {
+                    if (response.specialtyName && response.specialtyStatus !== undefined) {
                         console.log(response)
-                        $('#specialtyNameEdit').val(response.nameEdit);
-                        $('#specialtyStatusEdit').prop('checked', response.statusEdit == 1);
+                        $('#specialtyNameEdit').val(response.specialtyName);
+                        $('#specialtyStatusEdit').prop('checked', response.specialtyStatus == 1);
                         $('#exampleModalEdit').data('id', id);
                     } else {
                         console.error('Missing data in response:', response);
                     }
                 },
-                error: function (error) {
+                error: function(error) {
                     console.error(error);
                 }
             })
         }
 
-        $('#save-btn-edit').click(function () {
+        $('#updateSpecialty').click(function() {
             var id = $('#exampleModalEdit').data('id');
-            // console.log('Đây là id:',id);
+
             const specialtyName = $('#specialtyNameEdit').val();
             const specialtyStatus = $('#specialtyStatusEdit').is(':checked') ? 1 : 0;
-
-            console.log(specialtyName, specialtyStatus);
 
             $.ajax({
                 url: '/system/specialties/update/' + id,
                 type: 'PATCH',
                 data: {
-                    nameEdit: specialtyName,
-                    statusEdit: specialtyStatus,
+                    specialtyName: specialtyName,
+                    specialtyStatus: specialtyStatus,
                     _token: '{{ csrf_token() }}'
                 },
-                success: function (response) {
+                success: function(response) {
                     $('#exampleModalEdit').modal('hide');
                     if (response.success) {
                         toastr.success(response.message);
-                        location.reload();
+                        setTimeout(() => {
+                            location.reload();
+                        }, 3000);
                     } else if (response.error) {
                         toastr.error(response.message);
                     }
                 },
-                error: function (err) {
-                    console.error("Error updating data:", err);
-                    alert('Có lỗi xảy ra: ' + err.responseJSON.error);
+                error: function(err) {
+                    if (err.responseJSON && err.responseJSON.errors) {
+                        let errors = err.responseJSON.errors;
+
+                        $('.invalid-feedback').text('');
+                        $('.form-control').removeClass('is-invalid');
+                        $.each(errors, function(key, value) {
+                            $('[name="' + key + '"]').addClass('is-invalid');
+                            $('#' + key + '_error').text(value[0]);
+                        });
+                    } else {
+                        console.error(error);
+                    }
                 }
             });
         });
-
-
     </script>
 
-@endsection
+    @endsection

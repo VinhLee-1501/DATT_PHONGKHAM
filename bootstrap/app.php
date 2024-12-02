@@ -19,7 +19,8 @@ return Application::configure(basePath: dirname(__DIR__))
                 'page.php',
                 'auth.php',
                 'profile.php',
-                'book.php'
+                'book.php',
+                'profile-doctor.php'
 
             ];
 
@@ -34,7 +35,8 @@ return Application::configure(basePath: dirname(__DIR__))
                 'account.php',
                 'blog.php',
                 'serviceType.php',
-                // 'service.php',
+                'service.php',
+                'order.php',
                 'account.php',
                 'doctor/medicalRecordDoctor.php',
                 'doctor/checkupHealth.php',
@@ -42,7 +44,8 @@ return Application::configure(basePath: dirname(__DIR__))
                 'specialty.php',
                 'profile.php',
                 'patient.php',
-
+                'sclinic.php',
+                'doctor.php',
             ];
 
 

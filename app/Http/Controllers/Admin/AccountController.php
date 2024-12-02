@@ -11,24 +11,45 @@ use Illuminate\Http\Request;
 
 class AccountController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::where('role', 0)
-            ->orderBy('users.row_id', 'desc')
-            ->get();
+        // Truy vấn người dùng với status = 1
+        $usersQuery = User::where('status', 1);
 
-        $admin = User::where('role', 1)
-            ->orderby('row_id' , 'desc')
-            ->get();
+        // Tìm kiếm theo họ
+        if ($request->filled('firstname')) {
+            $usersQuery->where('firstname', 'like', '%' . $request->firstname . '%');
+        }
 
-        $doctors = User::join('specialties', 'specialties.specialty_id', '=', 'users.specialty_id')
-            ->where('role', 2)
-            ->select('users.*', 'specialties.name as specialty_name')
-            ->get();
+        // Tìm kiếm theo tên
+        if ($request->filled('lastname')) {
+            $usersQuery->where('lastname', 'like', '%' . $request->lastname . '%');
+        }
 
+        // Tìm kiếm theo số điện thoại
+        if ($request->filled('phone')) {
+            $usersQuery->where('phone', 'like', '%' . $request->phone . '%');
+        }
 
-        return view('System.accounts.index', compact('admin', 'doctors', 'users'));
+        // Lấy giá trị tab từ query string nếu có
+        $activeTab = $request->query('tab', 'nav-home'); // Tab mặc định là 'nav-home'
+
+        // Truy vấn người dùng có role = 0 (Người dùng)
+        $users = clone $usersQuery; // Tạo bản sao của truy vấn
+        $users = $users->where('role', 0)->orderBy('row_id', 'desc')->paginate(10)->appends($request->query());
+
+        // Truy vấn admin có role = 1 (Quản trị)
+        $admin = clone $usersQuery; // Tạo bản sao của truy vấn
+        $admin = $admin->where('role', 1)->orderBy('row_id', 'desc')->paginate(10)->appends($request->query());
+
+        return view('System.accounts.index', compact('users', 'admin', 'activeTab'));
     }
+
+
+
+
+
+
 
     public function create()
     {
@@ -37,16 +58,15 @@ class AccountController extends Controller
 
         return view('System.accounts.create', compact('users', 'specialties'));
     }
-//
+    //
     public function store(AccountRequest $request)
     {
-//        // Lấy dữ liệu đã xác thực từ request
-//        $validatedData = $request->validated();
-//
-//        // Tạo một đối tượng User mới
-        $user = new User();
 
-        // Gán các giá trị từ validated data vào thuộc tính của model
+        $user = new User();
+        $role = $request->input('role');
+        $specialtyId = $role == 2 ? $request->input('specialty_id') : null;
+
+
         $user->user_id = $request->input('userid');
         $user->role = $request->input('role');
         $user->email = $request->input('email');
@@ -54,7 +74,7 @@ class AccountController extends Controller
         $user->password = bcrypt($request->input('password')); // Mã hóa mật khẩu
         $user->firstname = $request->input('firstname');
         $user->lastname = $request->input('lastname');
-        $user->specialty_id = $request->input('specialty_id');
+        $user->specialty_id = $specialtyId;
 
 
         $user->save();
@@ -70,13 +90,13 @@ class AccountController extends Controller
         // Join bảng users với bảng specialties
         $account = User::where('users.user_id', $user_id)
             ->first(); // Lấy bản ghi đầu tiên
-
+        $specialties = specialty::all();
         // Nếu không tìm thấy tài khoản, trả về thông báo lỗi
         if (!$account) {
             return redirect()->route('system.account')->with('error', 'Tài khoản không tồn tại!');
         }
         // Trả về view với thông tin account
-        return view('System.accounts.detail', compact('account'));
+        return view('System.accounts.detail', compact('account', 'specialties'));
     }
 
 
@@ -87,18 +107,25 @@ class AccountController extends Controller
         // Tìm user theo user_id
         $user = User::where('user_id', $user_id)->firstOrFail();
 
-        // Cập nhật thông tin từ request vào user
-         $user->update([
-            'firstname' => $request->input('firstname'), // Tên input trong form là 'firstname'
-            'lastname'  => $request->input('lastname'),  // Tên input trong form là 'lastname'
-            'role'       => $request->input('role'),
-            'email'      => $request->input('email'),
-            'phone'      => $request->input('phone'),
-            'password'   => $request->filled('password') ? bcrypt($request->input('password')) : $user->password,
-             'specialty_id' => $request->input('specialty_id'), // Phải là specialty từ request
-        ]);
+        // Kiểm tra xem mật khẩu mới có được nhập không
+        if ($request->filled('password')) {
+            // Nếu có mật khẩu mới, mã hóa nó
+            $user->password = bcrypt($request->input('password'));
+        }
 
-        dd($user);
+        // Kiểm tra role và gán specialty_id
+        $role = $request->input('role');
+        $specialtyId = $role == 2 ? $request->input('specialty_id') : null;
+
+        // Cập nhật các trường khác từ request vào user
+        $user->update([
+            'firstname' => $request->input('firstname'),
+            'lastname' => $request->input('lastname'),
+            'role' => $role,
+            'email' => $request->input('email'),
+            'phone' => $request->input('phone'),
+            'specialty_id' => $specialtyId,
+        ]);
 
         // Chuyển hướng về trang tài khoản với thông báo thành công
         return redirect()->route('system.account')->with('success', 'Cập nhật tài khoản thành công.');
@@ -108,15 +135,13 @@ class AccountController extends Controller
 
 
 
+
+
     public function destroy($user_id1)
     {
-//        dd($user_id1);
         $users = User::where('user_id', $user_id1);
-//        dd($users);
 
         $users->delete();
         return redirect()->route('system.account')->with('success', 'Xóa thành công');
     }
-
-
 }

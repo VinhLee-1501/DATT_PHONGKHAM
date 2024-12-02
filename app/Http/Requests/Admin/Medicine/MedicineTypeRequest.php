@@ -24,7 +24,6 @@ class MedicineTypeRequest extends FormRequest
         return [
             'code' => 'required|max:10|unique:medicine_types,medicine_type_id',
             'name' => 'required|max:255|unique:medicine_types,name',
-            
         ];
     }
 

@@ -8,6 +8,7 @@ use App\Models\Schedule;
 use App\Models\Sclinic;
 use App\Models\Specialty;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -28,9 +29,11 @@ class ScheduleController extends Controller
         return response()->json(['users' => $users]);
     }
 
-    public function getClinics()
+    public function getClinics(Request $request)
     {
-        $clinics = Sclinic::all();
+        $clinics = Sclinic::where('specialty_id', $request->input('specialty_id'))
+            ->where('status', 1)
+            ->get();
         return response()->json(['clinics' => $clinics]);
     }
 
@@ -73,7 +76,13 @@ class ScheduleController extends Controller
                 'sclinic_id' => $shift->sclinic_id,
                 'note' => $shift->note,
                 'phone' => $shift->phone,
-                'specialty_name' => $shift->specialty_name
+                'specialty_name' => $shift->specialty_name,
+                'doctorData' => [
+                    [
+                        'user_id' => $shift->userId,
+                        'sclinic_id' => $shift->sclinic_id,
+                    ]
+                ]
             ];
         }
 
@@ -110,11 +119,47 @@ class ScheduleController extends Controller
         //         dd($userId, $sclinicId);
         $day = $request->input('day');
         $note = $request->input('note');
+
+        // Kiểm tra ngày
+        $now = Carbon::now();
+        if($day < $now) {
+            return response()->json(['error' => true, 'message' => 'Bạn không thể thêm sự kiện vào ngày trước ngày hiện tại.']);
+        }
+        // Kiểm tra số lượng lịch đã có cho chuyên khoa này trong ngày
+        $existingSchedules = Schedule::where('user_id', $userId)
+            ->where('day', $day)
+            ->count();
+
+        // Kiểm tra xem số lượng tối đa có vượt quá 3 hay không
+        if ($existingSchedules >= 3) {
+            return response()->json(['error' => true, 'message' => 'Chuyên khoa này đã có tối đa 3 lịch vào ngày này.']);
+        }
+
+        // Kiểm tra xem bác sĩ đã có lịch làm việc trong ngày này chưa
         $existingSchedule = Schedule::where('user_id', $userId)
             ->where('day', $day)
             ->first();
+
         if ($existingSchedule) {
-            return response()->json(['error', 'Bác sĩ đã có lịch làm việc vào ngày này.']);
+            return response()->json(['error' => true, 'message' => 'Bác sĩ đã có lịch làm việc vào ngày này.']);
+        }
+
+        // Kiểm tra xem bác sĩ đã được lên lịch cho phòng khác chưa
+        $existingScheduleForAnotherClinic = Schedule::where('user_id', $userId)
+            ->where('day', $day)
+            ->where('sclinic_id', '!=', $sclinicId)
+            ->first();
+
+        if ($existingScheduleForAnotherClinic) {
+            return response()->json(['error' => true, 'message' => 'Bác sĩ này đã được lên lịch cho phòng khác vào ngày này.']);
+        }
+
+        $existingRoomSchedule = Schedule::where('sclinic_id', $sclinicId)
+            ->where('day', $day)
+            ->exists();
+
+        if ($existingRoomSchedule) {
+            return response()->json(['error' => true, 'message' => 'Phòng này đã có bác sĩ khác được lên lịch vào ngày này.']);
         }
 
         // Nếu không có lịch, thêm lịch mới
@@ -125,15 +170,13 @@ class ScheduleController extends Controller
         $schedule->day = $day;
         $schedule->note = $note;
         $schedule->status = 1;
-        $this->updateSclinic($schedule->sclinic_id);
+        // $this->updateSclinic($schedule->sclinic_id);
         $schedule->save();
 
         // dd($schedule);
 
-        return response()->json(['success' => true, 'message' => 'Thêm mới thành công.']);
+        return response()->json(['success' => true, 'message' => 'Thêm lịch khám thành công.']);
     }
-
-
 
 
     public function edit($shift_id)
@@ -157,37 +200,51 @@ class ScheduleController extends Controller
             ->where('user_id', $schedule->user_id)->first();
         // dd($user);
 
-        $sclinic = Sclinic::where('status', 0)
+        $specialty_id = $user->specialty_id;
+
+        $sclinic = Sclinic::where('status', 1)
+            ->where('specialty_id', $specialty_id)
             ->select('sclinic_id', 'name')->get();
-        $this->Sclinic($schedule->sclinic_id);
+        // $this->Sclinic($schedule->sclinic_id);
         return response()->json(['schedules' => $schedule, 'sclinic' => $sclinic, 'user' => $user]);
     }
 
     public function update(CreateRequest $request, $shift_id)
     {
         $schedule = Schedule::findOrFail($shift_id);
+        $userId = $schedule->user_id;
+        $newSclinicId = $request->input('sclinic_id'); // Phòng khám mới
+        $day = $request->input('day');
 
-        // Cập nhật ngày, phòng khám, ghi chú
-        $schedule->day = $request->input('day');
-        $schedule->sclinic_id = $request->input('sclinic_id'); // Cập nhật phòng khám nếu có thay đổi
+        // Kiểm tra xem bác sĩ đã được lên lịch cho phòng khác chưa
+        $existingScheduleForAnotherClinic = Schedule::where('user_id', $userId)
+            ->where('day', $day)
+            ->where('sclinic_id', '!=', $newSclinicId)
+            ->where('shift_id', '!=', $shift_id)
+            ->first();
+        if ($existingScheduleForAnotherClinic) {
+            return response()->json(['error' => false, 'message' => 'Bác sĩ này đã được lên lịch cho phòng khác vào ngày này.']);
+        }
+
+        // Kiểm tra có bác sĩ nào lên lịch
+        $existingRoomSchedule = Schedule::where('sclinic_id', $newSclinicId)
+            ->where('day', $day)
+            ->where('shift_id', '!=', $shift_id)
+            ->exists();
+
+        if ($existingRoomSchedule) {
+            return response()->json(['error' => true, 'message' => 'Phòng này đã có bác sĩ khác được lên lịch vào ngày này.']);
+        }
+
+        $schedule->day = $day;
+        $schedule->sclinic_id = $newSclinicId;
+        $schedule->status = $request->input('check') ? 1 : 0;
         $schedule->note = $request->input('note');
 
         // Lưu lại
         $schedule->update();
 
-        return response()->json(['success' => true, 'message' => 'Cập nhật thành công.']);
-    }
-
-    public function delete($shift_id)
-    {
-
-        $schedule = Schedule::findOrFail($shift_id);
-        $id = $schedule->shift_id;
-
-        $this->Sclinic($schedule->sclinic_id);
-
-        $schedule->delete();
-        return response()->json(['success' => true, 'message' => 'Xóa thành công.']);
+        return response()->json(['success' => true, 'message' => 'Cập nhật lịch khám thành công.']);
     }
     public function Sclinic($sclinic_id)
     {
@@ -197,5 +254,17 @@ class ScheduleController extends Controller
             $sclinic->status = 0;
             $sclinic->update();
         }
+    }
+
+    public function delete($shift_id)
+    {
+
+        $schedule = Schedule::findOrFail($shift_id);
+        $id = $schedule->shift_id;
+
+        // $this->Sclinic($schedule->sclinic_id);
+
+        $schedule->delete();
+        return response()->json(['success' => true, 'message' => 'Xóa lịch khám thành công.']);
     }
 }
