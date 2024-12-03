@@ -138,6 +138,7 @@
             font-weight: bold;
         }
 
+
         /* Responsive design for smaller screens */
         @media (max-width: 768px) {
             body {
@@ -188,8 +189,8 @@
         <div class="info-section">
             <p><strong>Mã hóa đơn:</strong> {{ $orders->order_id }}</p>
             <p><strong>Họ tên:</strong>
-        
-                    {{ $orders->name }}
+
+                {{ $orders->name }}
             </p>
         </div>
 
@@ -220,9 +221,11 @@
 
             <div class="total-section">
                 <p><span>Trả trước:</span> - {{ number_format($orders->total_price * 0.3, 0, ',', '.') }} VND</p>
-                <p><span>Tổng tiền:</span> {{ number_format($orders->total_price - $orders->total_price * 0.3, 0, ',', '.') }} VND</p>
+                <p><span>Tổng tiền:</span>
+                    {{ number_format($orders->total_price - $orders->total_price * 0.3, 0, ',', '.') }} VND</p>
                 <p><span>Người thu ngân:</span> {{ $orders->cashier }}</p>
             </div>
+           
         </div>
     </div>
 

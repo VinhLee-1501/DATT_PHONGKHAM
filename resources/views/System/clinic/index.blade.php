@@ -303,7 +303,7 @@
                         toastr.success(response.message);
                         setTimeout(() => {
                             location.reload();
-                        }, 3000);
+                        }, 1500);
                     } else if (response.error) {
                         toastr.error(response.message);
                     }
@@ -375,7 +375,7 @@
                     toastr.success(response.message);
                     setTimeout(() => {
                         location.reload();
-                    }, 3000);
+                    }, 1500);
                 } else if (response.error) {
                     toastr.error(response.message);
                 }

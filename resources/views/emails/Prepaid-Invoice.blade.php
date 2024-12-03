@@ -134,6 +134,10 @@
         .total-section p span {
             font-weight: bold;
         }
+          .info-meet {
+            font-size: 14px;
+
+        }
 
         /* Responsive design for smaller screens */
         @media (max-width: 768px) {
@@ -201,9 +205,14 @@
                 <tbody>
                 <tbody>
                     <tr>
-                        <td>{{ 1 }}</td>
+                        <td> 1 </td>
                         <td>Khám online</td>
                         <td>{{ number_format($orders->total_price, 0, ',', '.') }} VND</td>
+                    </tr>
+                    <tr>
+                         <td>2</td>
+                        <td>Trả trước</td>
+                        <td>{{ number_format($orders->total_price * 0.3, 0, ',', '.') }} VND</td>
                     </tr>
                 </tbody>
             </table>
@@ -214,8 +223,14 @@
                 <p><strong>Hình thức thanh toán:</strong> {{ $orders->payment == 0 ? 'Tiền mặt' : 'Chuyển khoản' }}</p>
             </div>
             <div class="total-section">
-                <p><span>Trả trước:</span> {{ number_format($orders->total_price * 0.3, 0, ',', '.') }} VND</p>
+                <p><span>Còn lại:</span> {{ number_format($orders->total_price * 0.7, 0, ',', '.') }} VND</p>
                 <p><span>Người thu ngân:</span> {{ $orders->cashier }}</p>
+            </div>
+             <div class="info-meet">
+                <p><span>Bác sĩ:</span>{{ $orders->firstname }} {{ $orders->lastname }}</p>
+                <p><span>Thời gian:</span> {{ \Carbon\Carbon::parse($orders->hour)->format('h:m') }} ngày:
+                    {{ \Carbon\Carbon::parse($orders->day)->format('d/m/Y') }} </p>
+                <p><span>Link cuộc họp:</span> <a href="{{ $orders->url }}">{{ $orders->url }}</a></p>
             </div>
         </div>
     </div>

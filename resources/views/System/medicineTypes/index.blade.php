@@ -294,7 +294,7 @@
                     $('#updateMedicineTypeModal').modal('hide');
                     setTimeout(() => {
                         location.reload();
-                    }, 2000);
+                    }, 1500);
                 } else if (response.error) {
                     toastr.error(response.message);
                 }

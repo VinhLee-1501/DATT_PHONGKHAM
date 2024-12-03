@@ -11,59 +11,81 @@
 
             <nav class="mb-4">
                 <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                    <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home"
-                        type="button" role="tab" aria-controls="nav-home" aria-selected="true">Chưa thanh toán</button>
-                    <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile"
-                        type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Thanh toán
+                    <button class="nav-link {{ $activeTab == 'nav-home' ? 'active' : '' }}" id="nav-home-tab"
+                        data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab"
+                        aria-controls="nav-home" aria-selected="true">Chưa thanh
+                        toán</button>
+                    <button class="nav-link {{ $activeTab == 'nav-profile' ? 'active' : '' }} "id="nav-profile-tab"
+                        data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab"
+                        aria-controls="nav-profile" aria-selected="false">Thanh
+                        toán
                         trước</button>
-                    <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact"
-                        type="button" role="tab" aria-controls="nav-contact" aria-selected="false">
+                    <button class="nav-link {{ $activeTab == 'nav-contact' ? 'active' : '' }} "id="nav-contact-tab"
+                        data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab"
+                        aria-controls="nav-contact" aria-selected="false">
                         Đã thanh toán trước</button>
-                    <button class="nav-link" id="nav-contacts-tab" data-bs-toggle="tab" data-bs-target="#nav-contacts"
-                        type="button" role="tab" aria-controls="nav-contacts" aria-selected="false">
+                    <button class="nav-link {{ $activeTab == 'nav-contacts' ? 'active' : '' }}"id="nav-contacts-tab"
+                        data-bs-toggle="tab" data-bs-target="#nav-contacts" type="button" role="tab"
+                        aria-controls="nav-contacts" aria-selected="false">
                         Đã thanh toán</button>
                 </div>
             </nav>
-            <div class="row align-items-center me-0">
-                <!-- Tìm kiếm và nút xóa -->
-                <div class="col-12 col-md-6 col-sm-2 d-flex align-items-center mb-3 mb-md-0">
-                    <form id="searchForm" action="{{ route('system.order') }}" method="GET"
-                        class="d-flex align-items-center">
-                        <div class="w-40">
-                            <input type="text" name="search" id="searchInput" class="form-control"
-                                value="{{ request('search', $search) }}" placeholder="Nhập mã">
+            <form action="{{ route('system.order') }}" method="GET" class="row mb-3 g-2 align-items-center">
+                <!-- Hidden input to maintain the active tab -->
+                <input type="hidden" name="tab" class="tab" id="tabInput" value="{{ request('tab', '0') }}">
+
+
+                <!-- Tìm kiếm -->
+                <div class="col-md-9 col-lg-10">
+                    <div class="row g-2">
+                        <!-- Tên sản phẩm -->
+                        <div class="col-md-4">
+                            <input type="text" id="inputName" class="form-control" placeholder="Họ tên bệnh nhân"
+                                name="name" value="{{ request('name') }}">
                         </div>
-                        <input type="hidden" name="tab" class="tab" id="tabInput" value="0">
-                        <button type="submit" class="btn btn-success" id="searchButton">
-                            <i class="ti ti-search"></i>
-                        </button>
-                    </form>
-                    <button type="button" id="deleteButton" class="btn btn-danger ms-2 multiple-delete"
-                        style="display: none;">
-                        <i class="ti ti-trash"></i>
-                    </button>
+
+                        <!-- Giá từ -->
+                        <div class="col-md-4">
+                            <input type="number" id="inputPriceFrom" class="form-control" placeholder="Giá từ"
+                                name="price_from" value="{{ request('price_from') }}">
+                        </div>
+
+                        <!-- Giá đến -->
+                        <div class="col-md-4">
+                            <input type="number" id="inputPriceTo" class="form-control" placeholder="Giá đến"
+                                name="price_to" value="{{ request('price_to') }}">
+                        </div>
+                        <!-- Mã sản phẩm -->
+                        <div class="col-md-4">
+                            <input type="text" id="inputCode" class="form-control" placeholder="Mã hóa đơn"
+                                name="code_order" value="{{ request('code_order') }}">
+                        </div>
+                        <!-- Ngày từ -->
+                        <div class="col-md-4">
+                            <input type="date" id="inputDateFrom" class="form-control" placeholder="Ngày từ"
+                                name="date_from" value="{{ request('date_from') }}">
+                        </div>
+
+                        <!-- Ngày đến -->
+                        <div class="col-md-4">
+                            <input type="date" id="inputDateTo" class="form-control" placeholder="Ngày đến"
+                                name="date_to" value="{{ request('date_to') }}">
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Chọn số lượng hiển thị nằm trên cùng một hàng -->
-                <div class="col-auto ms-auto d-flex align-items-center">
-                    <span class="me-2 d-none d-sm-inline">Hiển thị:</span>
-                    <select class="form-select d-none d-sm-inline" style="width: 75px" id="itemsPerPage"
-                        aria-label="Items per page">
-                        <option value="5" {{ request()->input('itemsPerPage', 5) == 5 ? 'selected' : '' }}>
-                            5
-                        </option>
-                        <option value="10" {{ request()->input('itemsPerPage', 5) == 10 ? 'selected' : '' }}>10
-                        </option>
-                        <option value="15" {{ request()->input('itemsPerPage', 5) == 15 ? 'selected' : '' }}>15
-                        </option>
-                        <option value="20" {{ request()->input('itemsPerPage', 5) == 20 ? 'selected' : '' }}>20
-                        </option>
-                    </select>
+                <!-- Nút tìm kiếm và thêm sản phẩm -->
+                <div class="col-md-3 col-lg-2">
+                    <div class="row g-2">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary w-100">Tìm kiếm</button>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </form>
             <div class="tab-content" id="nav-tabContent">
                 <!-- Tab Dịch vụ hoạt động -->
-                <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+                <div class="tab-pane fade show " id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
                     <div class="table-responsive ">
                         <table class="table table-bordered text-nowrap mb-0 align-middle">
                             <thead class="text-dark fs-4">
@@ -71,9 +93,9 @@
                                     <th class="border-bottom-0">
                                         <h6 class="fw-semibold mb-0">Mã hóa đơn</h6>
                                     </th>
-                                    {{-- <th class="border-bottom-0">
+                                    <th class="border-bottom-0">
                                         <h6 class="fw-semibold mb-0">Họ tên bệnh nhân</h6>
-                                    </th> --}}
+                                    </th>
                                     <th class="border-bottom-0">
                                         <h6 class="fw-semibold mb-0">Ngày xuất bản</h6>
                                     </th>
@@ -89,22 +111,19 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @if ($ordersUnpaid->isEmpty())
-                                    <tr>
-                                        <td colspan="6" class="text-center">
-                                            <h5 class="text-muted">Không tìm thấy kết quả nào</h5>
-                                        </td>
-                                    </tr>
+                                @if (is_null($ordersUnpaid))
+                                    <div id="noResults" class="alert alert-warning">Không tìm thấy dữ liệu.</div>
                                 @else
-                                    @foreach ($ordersUnpaid as $data)
+                                    @foreach ($ordersUnpaid->items() as $data)
                                         <tr class="order-row text-center">
                                             <td class="border-bottom-0">
                                                 <p class="fw-semibold mb-0">{{ $data->order_id }}</p>
                                             </td>
-                                            {{-- <td class="border-bottom-0">
-                                                <p class="mb-0 fw-semibold">{{ $data->last_name }} {{ $data->first_name }}
+                                            <td class="border-bottom-0">
+                                                <p class="mb-0 fw-semibold">{{ $data->last_name }}
+                                                    {{ $data->first_name }}
                                                 </p>
-                                            </td> --}}
+                                            </td>
                                             <td class="border-bottom-0">
                                                 <p class="mb-0 fw-semibold">
                                                     {{ Carbon\Carbon::parse($data->created_at)->format('d/m/Y | h:m:s') }}
@@ -112,7 +131,7 @@
                                             </td>
                                             <td class="border-bottom-0">
                                                 <p class="mb-0 fw-semibold">
-                                                    {{ number_format($data->total_price + 20000, 0, ',', '.') }} VND
+                                                    {{ number_format($data->total_price, 0, ',', '.') }} VND
                                                 </p>
                                             </td>
                                             <td class="border-bottom-0">
@@ -137,7 +156,7 @@
                 </div>
 
                 <!-- Tab Dịch vụ không hoạt động -->
-                <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+                <div class="tab-pane fade " id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
                     <div class="table-responsive ">
                         <table class="table table-bordered text-nowrap mb-0 align-middle">
                             <thead class="text-dark fs-4">
@@ -145,9 +164,9 @@
                                     <th class="border-bottom-0">
                                         <h6 class="fw-semibold mb-0">Mã hóa đơn</h6>
                                     </th>
-                                    {{-- <th class="border-bottom-0">
+                                    <th class="border-bottom-0">
                                         <h6 class="fw-semibold mb-0">Họ tên bệnh nhân</h6>
-                                    </th> --}}
+                                    </th>
                                     <th class="border-bottom-0">
                                         <h6 class="fw-semibold mb-0">Ngày xuất bản</h6>
                                     </th>
@@ -163,13 +182,8 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @if ($ordersPrepaid->isEmpty())
-                                    <tr>
-                                        <td colspan="6" class="text-center">
-                                            <h5 class="text-muted">Không tìm thấy kết quả nào
-                                            </h5>
-                                        </td>
-                                    </tr>
+                                @if (is_null($ordersPrepaid))
+                                    <div id="noResults" class="alert alert-warning">Không tìm thấy dữ liệu.</div>
                                 @else
                                     @foreach ($ordersPrepaid as $data)
                                         <tr class="order-row text-center">
@@ -250,7 +264,7 @@
                     </div>
                 </div>
 
-                <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
+                <div class="tab-pane fade " id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
                     <div class="table-responsive ">
                         <table class="table table-bordered text-nowrap mb-0 align-middle">
                             <thead class="text-dark fs-4">
@@ -276,13 +290,8 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @if ($ordersisPrepaid->isEmpty())
-                                    <tr>
-                                        <td colspan="6" class="text-center">
-                                            <h5 class="text-muted">Không tìm thấy kết quả nào
-                                            </h5>
-                                        </td>
-                                    </tr>
+                                @if (is_null($ordersisPrepaid))
+                                    <div id="noResults" class="alert alert-warning">Không tìm thấy dữ liệu.</div>
                                 @else
                                     @foreach ($ordersisPrepaid as $data)
                                         <tr class="order-row text-center">
@@ -365,18 +374,17 @@
                     </div>
                 </div>
 
-                <div class="tab-pane fade" id="nav-contacts" role="tabpanel" aria-labelledby="nav-contacts-tab">
+                <div class="tab-pane fade " id="nav-contacts" role="tabpanel" aria-labelledby="nav-contacts-tab">
                     <div class="table-responsive ">
                         <table class="table table-bordered text-nowrap mb-0 align-middle">
                             <thead class="text-dark fs-4">
                                 <tr class="text-center">
-                                    <th></th>
                                     <th class="border-bottom-0">
                                         <h6 class="fw-semibold mb-0">Mã hóa đơn</h6>
                                     </th>
-                                    {{-- <th class="border-bottom-0">
+                                    <th class="border-bottom-0">
                                         <h6 class="fw-semibold mb-0">Họ tên bệnh nhân</h6>
-                                    </th> --}}
+                                    </th>
                                     <th class="border-bottom-0">
                                         <h6 class="fw-semibold mb-0">Ngày xuất bản</h6>
                                     </th>
@@ -392,26 +400,15 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @if ($ordersPaid->isEmpty())
-                                    <tr>
-                                        <td colspan="6" class="text-center">
-                                            <h5 class="text-muted">Không tìm thấy kết quả nào
-                                            </h5>
-                                        </td>
-                                    </tr>
-                                @else
+                                @if (is_null($ordersPaid))
+
+                                    <div id="noResults" class="alert alert-warning">Không tìm thấy dữ liệu.</div>
+                                    @else
                                     @foreach ($ordersPaid as $data)
                                         <tr class="order-row text-center">
-                                            <td>
-                                                <input type="checkbox" name="order_id[]" value=""
-                                                    class="blogCheckbox">
-                                            </td>
                                             <td class="border-bottom-0">
                                                 <p class="fw-semibold mb-0">{{ $data->order_id }}</p>
                                             </td>
-                                            {{-- <td class="border-bottom-0 ">
-                                                <p class="mb-0 fw-semibold">{{ $data->last_name }}
-                                                    {{ $data->first_name }}
                                             <td class="border-bottom-0 ">
                                                 <p class="mb-0 fw-semibold">
                                                     @if ($data->name)
@@ -424,16 +421,22 @@
                                                         Chưa có thông tin bệnh nhân
                                                     @endif
                                                 </p>
-                                            </td> --}}
+                                            </td>
                                             <td class="border-bottom-0">
                                                 <p class="mb-0 fw-semibold">
                                                     {{ Carbon\Carbon::parse($data->created_at)->format('d/m/Y | h:m:s') }}
                                                 </p>
                                             </td>
                                             <td class="border-bottom-0">
-                                                <p class="mb-0 fw-semibold">
-                                                    {{ number_format($data->total_price, 0, ',', '.') }} VND
-                                                </p>
+                                                @if (!empty($data->treatment_id))
+                                                    <p class="mb-0 fw-semibold">
+                                                        {{ number_format($data->total_amount, 0, ',', '.') }} VND
+                                                    </p>
+                                                @else
+                                                    <p class="mb-0 fw-semibold">
+                                                        {{ number_format($data->total_price, 0, ',', '.') }} VND
+                                                    </p>
+                                                @endif
                                             </td>
                                             <td class="border-bottom-0">
                                                 <p class="badge bg-success mb-0 fw-semibold">Đã thanh toán</p>
@@ -533,6 +536,7 @@
                                         name="payment_method" required>
                                         <option value="0">Tiền mặt</option>
                                         <option value="1">Momo</option>
+                                       
                                     </select>
                                 </div>
                             </div>
@@ -571,7 +575,7 @@
     </form>
 
     @push('scripts')
-        <script>
+        {{-- <script>
             $(document).ready(function() {
                 // Gắn sự kiện onchange cho select
                 $('#itemsPerPage').on('change', function() {
@@ -588,8 +592,8 @@
                     window.location.href = url.toString();
                 });
             });
-        </script>
-        <script>
+        </script> --}}
+        {{-- <script>
             document.addEventListener('DOMContentLoaded', function() {
                 // Lắng nghe sự kiện khi người dùng click vào tab
                 document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(function(tabButton) {
@@ -613,7 +617,7 @@
                     document.getElementById('deleteButton').style.display = 'none'; // Ẩn nút xóa
                 }
             });
-        </script>
+        </script> --}}
         <script>
             $(document).ready(function() {
                 var currentOrderData = null;
@@ -689,12 +693,12 @@
                     const cashInputWrapper = $('#cashInputWrapper');
                     const changeAmountWrapper = $('#changeAmount').closest('div');
 
-                    if ($(this).val() === '1') { // Nếu chọn Momo
-                        cashInputWrapper.hide();
-                        changeAmountWrapper.hide();
-                    } else { // Nếu chọn Tiền mặt
+                    if ($(this).val() === '0') { // Nếu chọn Momo
                         cashInputWrapper.show();
                         changeAmountWrapper.show();
+                    } else { // Nếu chọn Tiền mặt                     
+                        cashInputWrapper.hide();
+                        changeAmountWrapper.hide();
                     }
                 });
 
@@ -754,6 +758,9 @@
                                     } else {
                                         toastr.error('Không tìm thấy liên kết thanh toán.');
                                     }
+                                } else if (paymentMethod === "2") {
+
+
                                 } else {
                                     toastr.error('Phương thức thanh toán không hợp lệ.');
                                 }
@@ -815,7 +822,7 @@
                 }
             });
         </script>
-        <script>
+        {{-- <script>
             document.getElementById('deleteButton').addEventListener('click', function(e) {
                 e.preventDefault();
 
@@ -862,7 +869,7 @@
                     toastr.error('Vui lòng chọn ít nhất một hóa đơn để xóa');
                 }
             });
-        </script>
+        </script> --}}
         <script>
             $(document).ready(function() {
                 // Tạo khóa lưu trữ duy nhất dựa trên đường dẫn URL hiện tại để tránh xung đột

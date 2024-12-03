@@ -121,7 +121,7 @@
                                             </td>
                                             <td class="border-bottom-0">
                                                 <p class="fw-semibold mb-0">
-                                                    {{ number_format($data->price * 1000, 0, ',', '.') }} VND
+                                                    {{ number_format($data->price) }} VND
                                                 </p>
                                             </td>
                                             <td class="border-bottom-0">
@@ -571,7 +571,9 @@
                             if (response.success) {
                                 toastr.success(response.message);
 
-                                location.reload();
+                                setTimeout(() =>{
+                                    location.reload();
+                                }, 15000)
 
                             } else {
                                 toastr.error(response.message);
